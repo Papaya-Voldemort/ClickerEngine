@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.DS_Store
+coverage/
+.idea/
+.vscode/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+/.cache
+.parcel-cache
+.nyc_output
+/.pnp
+/.pnp.js

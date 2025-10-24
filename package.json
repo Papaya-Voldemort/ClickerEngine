@@ -1,0 +1,35 @@
+{
+  "name": "clicker-game-engine",
+  "version": "1.0.0",
+  "homepage": ".",
+  "description": "A modular, well-documented clicker game engine framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "webpack serve --mode development --config webpack.config.js",
+    "build": "webpack --mode production --config webpack.config.js",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "docs": "typedoc src --out docs/api"
+  },
+  "keywords": [
+    "clicker",
+    "game",
+    "engine",
+    "framework",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0",
+    "webpack-dev-server": "^4.0.0",
+    "ts-loader": "^9.0.0",
+    "html-webpack-plugin": "^5.0.0",
+    "typedoc": "^0.24.0"
+  }
+}
