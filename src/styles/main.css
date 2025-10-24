@@ -1,0 +1,33 @@
+/**
+ * Main Stylesheet
+ * Imports all modular CSS files in the correct order
+ * 
+ * This file provides a complete, modular styling system for the Clicker Game Engine.
+ * Each section is separated into its own file for better organization and maintainability.
+ * 
+ * Architecture:
+ * 1. Variables - Design tokens and CSS custom properties
+ * 2. Reset - Browser normalization
+ * 3. Layout - Page structure and grid systems
+ * 4. Components - Reusable UI elements
+ * 5. Game - Game-specific components
+ * 6. Utilities - Helper classes
+ */
+
+/* 1. CSS Variables and Design Tokens */
+@import './variables.css';
+
+/* 2. Reset and Base Styles */
+@import './reset.css';
+
+/* 3. Layout Components */
+@import './layout.css';
+
+/* 4. UI Components */
+@import './components.css';
+
+/* 5. Game-Specific Components */
+@import './game.css';
+
+/* 6. Utility Classes */
+@import './utilities.css';
