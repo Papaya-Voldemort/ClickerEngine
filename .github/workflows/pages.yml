@@ -25,6 +25,12 @@ jobs:
       - name: Build
         run: npm run build --if-present
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifact
+          path: ./dist
+
       - name: Prepare artifact (add .nojekyll)
         run: |
           mkdir -p dist
