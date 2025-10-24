@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -22,21 +22,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build project
         run: npm run build --if-present
 
-      - name: Upload build artifact
+      - name: Prepare .nojekyll
+        run: |
+          mkdir -p dist
+          touch dist/.nojekyll
+
+      - name: Upload build artifact (for debugging)
         uses: actions/upload-artifact@v4
         with:
           name: dist-artifact
           path: ./dist
 
-      - name: Prepare artifact (add .nojekyll)
-        run: |
-          mkdir -p dist
-          touch dist/.nojekyll
-
-      - name: Upload pages artifact
+      - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./dist
