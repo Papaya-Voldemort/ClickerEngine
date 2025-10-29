@@ -28,8 +28,10 @@ body {
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
   color: var(--text-primary);
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #AF52DE 100%);
+  background-attachment: fixed;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Remove list styles */
