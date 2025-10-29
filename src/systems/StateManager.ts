@@ -8,6 +8,8 @@ import { EventBus, GameEvents } from '../core/EventBus';
 import { CurrencyManager } from './CurrencyManager';
 import { UpgradeManager } from './UpgradeManager';
 import { ParadigmManager } from './ParadigmManager';
+import { AchievementManager } from './AchievementManager';
+import { StatisticsManager } from './StatisticsManager';
 
 /**
  * StateManager - Handles game state persistence
@@ -41,12 +43,16 @@ export class StateManager {
    * @param currencyManager - The currency manager
    * @param upgradeManager - The upgrade manager
    * @param paradigmManager - The paradigm manager
+   * @param achievementManager - The achievement manager (optional)
+   * @param statisticsManager - The statistics manager (optional)
    */
   constructor(
     private eventBus: EventBus,
     private currencyManager: CurrencyManager,
     private upgradeManager: UpgradeManager,
-    private paradigmManager: ParadigmManager
+    private paradigmManager: ParadigmManager,
+    private achievementManager?: AchievementManager,
+    private statisticsManager?: StatisticsManager
   ) {}
 
   /**
@@ -71,6 +77,8 @@ export class StateManager {
       upgrades: this.upgradeManager.getAsRecord(),
       currentParadigm: current?.id ?? 'default',
       totalClicks: 0, // Should be tracked by main engine
+      achievements: this.achievementManager?.serialize(),
+      statistics: this.statisticsManager?.serialize(),
       custom: customState
     };
   }
@@ -113,6 +121,16 @@ export class StateManager {
       // Restore paradigm
       if (state.currentParadigm && this.paradigmManager.isAvailable(state.currentParadigm)) {
         this.paradigmManager.switchTo(state.currentParadigm);
+      }
+
+      // Restore achievements
+      if (state.achievements && this.achievementManager) {
+        this.achievementManager.deserialize(state.achievements);
+      }
+
+      // Restore statistics
+      if (state.statistics && this.statisticsManager) {
+        this.statisticsManager.deserialize(state.statistics);
       }
 
       this.eventBus.emit(GameEvents.STATE_LOADED, { key, timestamp: state.timestamp });

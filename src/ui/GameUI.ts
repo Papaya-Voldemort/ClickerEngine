@@ -130,6 +130,8 @@ export class GameUI {
         return this.getUpgradesTabContent();
       case 'workers':
         return this.getWorkersTabContent();
+      case 'achievements':
+        return this.getAchievementsTabContent();
       case 'prestige':
         return this.getPrestigeTabContent();
       case 'settings':
@@ -145,17 +147,51 @@ export class GameUI {
   private getMainTabContent(): string {
     const gold = this.game.getCurrencyAmount('gold');
     const clickMultiplier = this.game.getClickMultiplier('gold');
+    const production = this.game.getDisplayProduction('gold');
+    const paradigm = this.game.getCurrentParadigm();
+    
+    // Map paradigm names to icons
+    const paradigmIcons: Record<string, string> = {
+      'early-game': '🌱',
+      'mid-game': '🌿',
+      'late-game': '🌳',
+      'prestige': '👑',
+      'transcendence': '✨',
+      'infinity': '♾️'
+    };
+    const paradigmIcon = paradigm?.id ? paradigmIcons[paradigm.id] || '⭐' : '⭐';
     
     return `
       <div class="click-area">
         <h2 class="section-heading text-center">Click to Earn Gold!</h2>
         
-        <div class="click-area__stats">
+        <div class="grid grid--2-cols" style="margin-bottom: var(--spacing-lg); gap: var(--spacing-md);">
           <div class="stat">
             <span class="stat__label">Per Click</span>
             <span class="stat__value">
               <span class="stat__icon">💰</span>
               <span>${this.formatNumber(clickMultiplier)}</span>
+            </span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Per Second</span>
+            <span class="stat__value">
+              <span class="stat__icon">⏱️</span>
+              <span>${this.formatNumber(production)}</span>
+            </span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Current Gold</span>
+            <span class="stat__value">
+              <span class="stat__icon">💰</span>
+              <span>${this.formatNumber(gold)}</span>
+            </span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Paradigm</span>
+            <span class="stat__value">
+              <span class="stat__icon">${paradigmIcon}</span>
+              <span>${paradigm?.productionMultiplier || 1}x</span>
             </span>
           </div>
         </div>
@@ -176,7 +212,15 @@ export class GameUI {
    */
   private getUpgradesTabContent(): string {
     const upgrades = this.game.getUpgradeManager()
-      .getFiltered((u: Upgrade) => u.id.startsWith('click-power'));
+      .getFiltered((u: Upgrade) => this.isClickPowerUpgrade(u));
+    
+    // Calculate total click multiplier
+    let clickMultiplier = 1;
+    upgrades.forEach(u => {
+      if (u.level > 0) {
+        clickMultiplier *= Math.pow(u.effect, u.level);
+      }
+    });
     
     if (upgrades.length === 0) {
       return `
@@ -189,10 +233,30 @@ export class GameUI {
 
     return `
       <h2 class="section-heading">Click Power Upgrades</h2>
+      
+      <div class="card" style="margin-bottom: var(--spacing-lg);">
+        <div class="card__body">
+          <div class="stat">
+            <span class="stat__label">Total Click Power</span>
+            <span class="stat__value">
+              <span class="stat__icon">⚡</span>
+              <span>${this.formatNumber(clickMultiplier)}x</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      
       <div class="grid grid--auto-fit">
         ${upgrades.map((upgrade: Upgrade) => this.getUpgradeCardHTML(upgrade)).join('')}
       </div>
     `;
+  }
+
+  /**
+   * Check if upgrade is a click power upgrade
+   */
+  private isClickPowerUpgrade(upgrade: Upgrade): boolean {
+    return upgrade.id.startsWith('click-power') || upgrade.id === 'critical-click';
   }
 
   /**
@@ -201,6 +265,12 @@ export class GameUI {
   private getWorkersTabContent(): string {
     const workers = this.game.getUpgradeManager()
       .getFiltered((u: Upgrade) => u.id.startsWith('worker-'));
+    
+    // Calculate total production from workers
+    let totalProduction = 0;
+    workers.forEach(worker => {
+      totalProduction += worker.effect * worker.level;
+    });
     
     if (workers.length === 0) {
       return `
@@ -213,9 +283,89 @@ export class GameUI {
 
     return `
       <h2 class="section-heading">Workers (Passive Income)</h2>
+      
+      <div class="card" style="margin-bottom: var(--spacing-lg);">
+        <div class="card__body">
+          <div class="stat">
+            <span class="stat__label">Total Production</span>
+            <span class="stat__value">
+              <span class="stat__icon">🏭</span>
+              <span>${this.formatNumber(totalProduction)}/s</span>
+            </span>
+          </div>
+          <div class="stat" style="margin-top: var(--spacing-sm);">
+            <span class="stat__label">With Multiplier</span>
+            <span class="stat__value">
+              <span class="stat__icon">✨</span>
+              <span>${this.formatNumber(this.game.getDisplayProduction('gold'))}/s</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      
       <div class="grid grid--auto-fit">
         ${workers.map((worker: Upgrade) => this.getUpgradeCardHTML(worker)).join('')}
       </div>
+    `;
+  }
+
+  /**
+   * Achievements tab content
+   */
+  private getAchievementsTabContent(): string {
+    const achievements = this.game.getAchievements();
+    const unlocked = achievements.filter(a => a.unlocked);
+    const locked = achievements.filter(a => !a.unlocked && !a.hidden);
+    const completion = this.game.getAchievementCompletion();
+
+    return `
+      <h2 class="section-heading">Achievements</h2>
+      <div style="margin-bottom: var(--spacing-lg);">
+        <div class="stat">
+          <span class="stat__label">Completion</span>
+          <span class="stat__value">${completion.toFixed(1)}%</span>
+        </div>
+        <div class="stat" style="margin-top: var(--spacing-sm);">
+          <span class="stat__label">Unlocked</span>
+          <span class="stat__value">${unlocked.length} / ${achievements.filter(a => !a.hidden).length}</span>
+        </div>
+      </div>
+
+      ${unlocked.length > 0 ? `
+        <h3 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">Unlocked</h3>
+        <div class="grid grid--auto-fit" style="margin-bottom: var(--spacing-xl);">
+          ${unlocked.map(achievement => `
+            <div class="achievement-card achievement-card--unlocked">
+              <div class="achievement-card__icon">${achievement.icon || '🏆'}</div>
+              <div class="achievement-card__name">${achievement.name}</div>
+              <div class="achievement-card__description">${achievement.description}</div>
+              <div class="achievement-card__badge">✓ Unlocked</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      ${locked.length > 0 ? `
+        <h3 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">Locked</h3>
+        <div class="grid grid--auto-fit">
+          ${locked.map(achievement => {
+            const progressPercent = (achievement.progress / achievement.target) * 100;
+            return `
+              <div class="achievement-card achievement-card--locked">
+                <div class="achievement-card__icon">${achievement.icon || '🏆'}</div>
+                <div class="achievement-card__name">${achievement.name}</div>
+                <div class="achievement-card__description">${achievement.description}</div>
+                <div class="achievement-card__progress">
+                  <div class="progress-bar">
+                    <div class="progress-bar__fill" style="width: ${progressPercent}%"></div>
+                  </div>
+                  <div class="progress-text">${this.formatNumber(achievement.progress)} / ${this.formatNumber(achievement.target)}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : ''}
     `;
   }
 
@@ -260,9 +410,52 @@ export class GameUI {
    * Settings tab content
    */
   private getSettingsTabContent(): string {
+    const stats = this.game.getStatistics();
+    
     return `
       <h2 class="section-heading">Settings</h2>
+      
       <div class="card">
+        <h3 class="card__title">📊 Statistics</h3>
+        <div class="card__body">
+          <div class="grid grid--2-cols" style="margin-top: var(--spacing-md); gap: var(--spacing-md);">
+            <div class="stat">
+              <span class="stat__label">Total Clicks</span>
+              <span class="stat__value">${this.formatNumber(stats.totalClicks)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Gold Earned</span>
+              <span class="stat__value">💰 ${this.formatNumber(stats.totalGoldEarned)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Upgrades Purchased</span>
+              <span class="stat__value">${stats.totalUpgradesPurchased}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Highest Gold</span>
+              <span class="stat__value">💰 ${this.formatNumber(stats.highestGold)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Time Played</span>
+              <span class="stat__value">${this.formatTime(stats.totalTimePlayed)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Paradigm Changes</span>
+              <span class="stat__value">${stats.paradigmChanges}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Fastest Clicking</span>
+              <span class="stat__value">${stats.fastestClick} clicks/s</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Longest Session</span>
+              <span class="stat__value">${this.formatTime(stats.longestSession)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top: var(--spacing-lg);">
         <h3 class="card__title">Game Controls</h3>
         <div class="card__body">
           <div class="flex flex-col gap-md" style="margin-top: var(--spacing-lg);">
@@ -293,6 +486,21 @@ export class GameUI {
     const canAfford = this.game.getCurrencyAmount(upgrade.currencyId) >= cost;
     const affordClass = canAfford ? 'upgrade-card--affordable' : 'upgrade-card--unaffordable';
     
+    // Calculate effect info
+    let effectText = '';
+    if (upgrade.id.startsWith('worker-')) {
+      effectText = `+${this.formatNumber(upgrade.effect)}/s per level`;
+    } else if (this.isClickPowerUpgrade(upgrade)) {
+      const percentIncrease = ((upgrade.effect - 1) * 100).toFixed(0);
+      effectText = `+${percentIncrease}% per level`;
+    } else if (upgrade.id === 'gem-generator') {
+      effectText = `+${upgrade.effect} gems/s per level`;
+    } else if (upgrade.id === 'crystal-forge') {
+      effectText = `+${upgrade.effect} crystals/s per level`;
+    } else {
+      effectText = `${upgrade.effect}x`;
+    }
+    
     return `
       <div class="upgrade-card ${affordClass}" data-upgrade-id="${upgrade.id}">
         <div class="upgrade-card__header">
@@ -300,6 +508,7 @@ export class GameUI {
           <div class="upgrade-card__info">
             <div class="upgrade-card__name">${upgrade.name}</div>
             <div class="upgrade-card__description">${upgrade.description}</div>
+            ${upgrade.level > 0 ? `<div class="upgrade-card__effect">${effectText}</div>` : ''}
           </div>
         </div>
         <div class="upgrade-card__footer">
@@ -497,6 +706,19 @@ export class GameUI {
     if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
     if (num < 1000000000000) return (num / 1000000000).toFixed(1) + 'B';
     return (num / 1000000000000).toFixed(1) + 'T';
+  }
+
+  /**
+   * Format time in seconds for display
+   */
+  private formatTime(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ${seconds % 60}s`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ${minutes % 60}m`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ${hours % 24}h`;
   }
 
   /**
