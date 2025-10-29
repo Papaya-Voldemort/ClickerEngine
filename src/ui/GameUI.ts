@@ -150,6 +150,17 @@ export class GameUI {
     const production = this.game.getDisplayProduction('gold');
     const paradigm = this.game.getCurrentParadigm();
     
+    // Map paradigm names to icons
+    const paradigmIcons: Record<string, string> = {
+      'early-game': '🌱',
+      'mid-game': '🌿',
+      'late-game': '🌳',
+      'prestige': '👑',
+      'transcendence': '✨',
+      'infinity': '♾️'
+    };
+    const paradigmIcon = paradigm?.id ? paradigmIcons[paradigm.id] || '⭐' : '⭐';
+    
     return `
       <div class="click-area">
         <h2 class="section-heading text-center">Click to Earn Gold!</h2>
@@ -179,7 +190,7 @@ export class GameUI {
           <div class="stat">
             <span class="stat__label">Paradigm</span>
             <span class="stat__value">
-              <span class="stat__icon">${paradigm?.name === 'Early Game' ? '🌱' : paradigm?.name === 'Mid Game' ? '🌿' : '⭐'}</span>
+              <span class="stat__icon">${paradigmIcon}</span>
               <span>${paradigm?.productionMultiplier || 1}x</span>
             </span>
           </div>
@@ -201,7 +212,7 @@ export class GameUI {
    */
   private getUpgradesTabContent(): string {
     const upgrades = this.game.getUpgradeManager()
-      .getFiltered((u: Upgrade) => u.id.startsWith('click-power') || u.id === 'critical-click');
+      .getFiltered((u: Upgrade) => this.isClickPowerUpgrade(u));
     
     // Calculate total click multiplier
     let clickMultiplier = 1;
@@ -239,6 +250,13 @@ export class GameUI {
         ${upgrades.map((upgrade: Upgrade) => this.getUpgradeCardHTML(upgrade)).join('')}
       </div>
     `;
+  }
+
+  /**
+   * Check if upgrade is a click power upgrade
+   */
+  private isClickPowerUpgrade(upgrade: Upgrade): boolean {
+    return upgrade.id.startsWith('click-power') || upgrade.id === 'critical-click';
   }
 
   /**
@@ -472,7 +490,7 @@ export class GameUI {
     let effectText = '';
     if (upgrade.id.startsWith('worker-')) {
       effectText = `+${this.formatNumber(upgrade.effect)}/s per level`;
-    } else if (upgrade.id.startsWith('click-power') || upgrade.id === 'critical-click') {
+    } else if (this.isClickPowerUpgrade(upgrade)) {
       const percentIncrease = ((upgrade.effect - 1) * 100).toFixed(0);
       effectText = `+${percentIncrease}% per level`;
     } else if (upgrade.id === 'gem-generator') {
