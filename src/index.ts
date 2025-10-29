@@ -12,6 +12,7 @@ import { ProductionManager } from './systems/ProductionManager';
 import { StateManager } from './systems/StateManager';
 import { UIManager } from './ui/UIManager';
 import { AchievementManager, Achievement } from './systems/AchievementManager';
+import { StatisticsManager, GameStatistics } from './systems/StatisticsManager';
 
 /**
  * ClickerGameEngine - Main game engine class
@@ -85,6 +86,9 @@ export class ClickerGameEngine {
   /** Achievement system */
   private achievementManager: AchievementManager;
 
+  /** Statistics system */
+  private statisticsManager: StatisticsManager;
+
   /** Game loop handle */
   private gameLoopHandle: number | null = null;
   
@@ -114,6 +118,7 @@ export class ClickerGameEngine {
     this.upgradeManager = new UpgradeManager(this.eventBus, this.currencyManager);
     this.paradigmManager = new ParadigmManager(this.eventBus);
     this.achievementManager = new AchievementManager(this.eventBus);
+    this.statisticsManager = new StatisticsManager(this.eventBus);
     this.productionManager = new ProductionManager(
       this.eventBus,
       this.currencyManager,
@@ -125,7 +130,8 @@ export class ClickerGameEngine {
       this.currencyManager,
       this.upgradeManager,
       this.paradigmManager,
-      this.achievementManager
+      this.achievementManager,
+      this.statisticsManager
     );
     this.uiManager = new UIManager(this.eventBus);
 
@@ -347,6 +353,7 @@ export class ClickerGameEngine {
   public click(currencyId: string, baseAmount?: number): void {
     this.productionManager.click(currencyId, baseAmount);
     this.totalClicks++;
+    this.statisticsManager.recordClick();
   }
 
   // ============================================================
@@ -499,6 +506,25 @@ export class ClickerGameEngine {
   }
 
   // ============================================================
+  // STATISTICS MANAGEMENT
+  // ============================================================
+
+  /**
+   * Get game statistics
+   * @returns Current game statistics
+   */
+  public getStatistics(): GameStatistics {
+    return this.statisticsManager.getCurrentStatistics();
+  }
+
+  /**
+   * Get statistics manager (for advanced usage)
+   */
+  public getStatisticsManager(): StatisticsManager {
+    return this.statisticsManager;
+  }
+
+  // ============================================================
   // EVENT SYSTEM
   // ============================================================
 
@@ -596,6 +622,7 @@ export class ClickerGameEngine {
     this.upgradeManager.reset();
     this.productionManager.clear();
     this.achievementManager.clear();
+    this.statisticsManager.reset();
     this.totalClicks = 0;
     this.log('Game reset');
     this.eventBus.emit(GameEvents.GAME_RESET, {});
@@ -713,3 +740,5 @@ export type { StorageAdapter } from './systems/StateManager';
 export { UIManager } from './ui/UIManager';
 export { AchievementManager } from './systems/AchievementManager';
 export type { Achievement } from './systems/AchievementManager';
+export { StatisticsManager } from './systems/StatisticsManager';
+export type { GameStatistics } from './systems/StatisticsManager';

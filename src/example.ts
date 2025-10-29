@@ -557,17 +557,32 @@ export function createExampleGame(): ClickerGameEngine {
   // SETUP EVENT LISTENERS
   // ============================================================
 
-  // Log currency changes
+  // Log currency changes and track statistics
   game.on(GameEvents.CURRENCY_CHANGED, (data: any) => {
     console.log(
       `Currency '${data.currencyId}' changed: ${data.oldAmount} -> ${data.newAmount}`
     );
+    
+    // Track gold earned and highest gold
+    if (data.currencyId === 'gold' && data.newAmount > data.oldAmount) {
+      const earned = data.newAmount - data.oldAmount;
+      game.getStatisticsManager().recordGoldEarned(earned);
+      game.getStatisticsManager().updateHighestGold(data.newAmount);
+      
+      // Check gold achievements
+      game.updateAchievementProgress('gold-1k', data.newAmount);
+      game.updateAchievementProgress('gold-100k', data.newAmount);
+      game.updateAchievementProgress('gold-1m', data.newAmount);
+    }
   });
 
   // Update production when upgrades are purchased
   game.on(GameEvents.UPGRADE_PURCHASED, (data: any) => {
     const upgrade = game.getUpgrade(data.upgradeId);
     if (!upgrade) return;
+
+    // Track upgrade purchase
+    game.getStatisticsManager().recordUpgradePurchase();
 
     // Update click multiplier based on click power upgrades
     if (data.upgradeId.startsWith('click-power') || data.upgradeId === 'critical-click') {
@@ -645,22 +660,13 @@ export function createExampleGame(): ClickerGameEngine {
     game.updateAchievementProgress('click-10000', clicks);
   });
 
-  // Track currency for achievements
-  game.on(GameEvents.CURRENCY_CHANGED, (data: any) => {
-    if (data.currencyId === 'gold') {
-      const gold = game.getCurrencyAmount('gold');
-      game.updateAchievementProgress('gold-1k', gold);
-      game.updateAchievementProgress('gold-100k', gold);
-      game.updateAchievementProgress('gold-1m', gold);
-    }
-  });
-
-  // Log paradigm changes
+  // Log paradigm changes and track statistics
   game.on(GameEvents.PARADIGM_CHANGED, (data: any) => {
     console.log(
       `Paradigm changed to '${data.paradigmName}' with ${data.multiplier}x multiplier`
     );
     game.updateAchievementProgress('first-paradigm', 1);
+    game.getStatisticsManager().recordParadigmChange();
   });
 
   // Log achievement unlocks

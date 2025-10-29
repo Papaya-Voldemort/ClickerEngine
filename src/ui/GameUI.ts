@@ -322,9 +322,52 @@ export class GameUI {
    * Settings tab content
    */
   private getSettingsTabContent(): string {
+    const stats = this.game.getStatistics();
+    
     return `
       <h2 class="section-heading">Settings</h2>
+      
       <div class="card">
+        <h3 class="card__title">📊 Statistics</h3>
+        <div class="card__body">
+          <div class="grid grid--2-cols" style="margin-top: var(--spacing-md); gap: var(--spacing-md);">
+            <div class="stat">
+              <span class="stat__label">Total Clicks</span>
+              <span class="stat__value">${this.formatNumber(stats.totalClicks)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Gold Earned</span>
+              <span class="stat__value">💰 ${this.formatNumber(stats.totalGoldEarned)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Upgrades Purchased</span>
+              <span class="stat__value">${stats.totalUpgradesPurchased}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Highest Gold</span>
+              <span class="stat__value">💰 ${this.formatNumber(stats.highestGold)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Time Played</span>
+              <span class="stat__value">${this.formatTime(stats.totalTimePlayed)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Paradigm Changes</span>
+              <span class="stat__value">${stats.paradigmChanges}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Fastest Clicking</span>
+              <span class="stat__value">${stats.fastestClick} clicks/s</span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Longest Session</span>
+              <span class="stat__value">${this.formatTime(stats.longestSession)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top: var(--spacing-lg);">
         <h3 class="card__title">Game Controls</h3>
         <div class="card__body">
           <div class="flex flex-col gap-md" style="margin-top: var(--spacing-lg);">
@@ -559,6 +602,19 @@ export class GameUI {
     if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
     if (num < 1000000000000) return (num / 1000000000).toFixed(1) + 'B';
     return (num / 1000000000000).toFixed(1) + 'T';
+  }
+
+  /**
+   * Format time in seconds for display
+   */
+  private formatTime(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ${seconds % 60}s`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ${minutes % 60}m`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ${hours % 24}h`;
   }
 
   /**
