@@ -123,6 +123,8 @@ export interface GameState {
   currentParadigm: string;
   /** Total clicks/taps so far */
   totalClicks: number;
+  /** Achievement progress and unlock state */
+  achievements?: Record<string, { unlocked: boolean; progress: number }>;
   /** Custom game-specific state */
   custom?: Record<string, unknown>;
 }

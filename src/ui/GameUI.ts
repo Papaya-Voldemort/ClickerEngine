@@ -130,6 +130,8 @@ export class GameUI {
         return this.getUpgradesTabContent();
       case 'workers':
         return this.getWorkersTabContent();
+      case 'achievements':
+        return this.getAchievementsTabContent();
       case 'prestige':
         return this.getPrestigeTabContent();
       case 'settings':
@@ -216,6 +218,66 @@ export class GameUI {
       <div class="grid grid--auto-fit">
         ${workers.map((worker: Upgrade) => this.getUpgradeCardHTML(worker)).join('')}
       </div>
+    `;
+  }
+
+  /**
+   * Achievements tab content
+   */
+  private getAchievementsTabContent(): string {
+    const achievements = this.game.getAchievements();
+    const unlocked = achievements.filter(a => a.unlocked);
+    const locked = achievements.filter(a => !a.unlocked && !a.hidden);
+    const completion = this.game.getAchievementCompletion();
+
+    return `
+      <h2 class="section-heading">Achievements</h2>
+      <div style="margin-bottom: var(--spacing-lg);">
+        <div class="stat">
+          <span class="stat__label">Completion</span>
+          <span class="stat__value">${completion.toFixed(1)}%</span>
+        </div>
+        <div class="stat" style="margin-top: var(--spacing-sm);">
+          <span class="stat__label">Unlocked</span>
+          <span class="stat__value">${unlocked.length} / ${achievements.filter(a => !a.hidden).length}</span>
+        </div>
+      </div>
+
+      ${unlocked.length > 0 ? `
+        <h3 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">Unlocked</h3>
+        <div class="grid grid--auto-fit" style="margin-bottom: var(--spacing-xl);">
+          ${unlocked.map(achievement => `
+            <div class="achievement-card achievement-card--unlocked">
+              <div class="achievement-card__icon">${achievement.icon || '🏆'}</div>
+              <div class="achievement-card__name">${achievement.name}</div>
+              <div class="achievement-card__description">${achievement.description}</div>
+              <div class="achievement-card__badge">✓ Unlocked</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      ${locked.length > 0 ? `
+        <h3 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">Locked</h3>
+        <div class="grid grid--auto-fit">
+          ${locked.map(achievement => {
+            const progressPercent = (achievement.progress / achievement.target) * 100;
+            return `
+              <div class="achievement-card achievement-card--locked">
+                <div class="achievement-card__icon">${achievement.icon || '🏆'}</div>
+                <div class="achievement-card__name">${achievement.name}</div>
+                <div class="achievement-card__description">${achievement.description}</div>
+                <div class="achievement-card__progress">
+                  <div class="progress-bar">
+                    <div class="progress-bar__fill" style="width: ${progressPercent}%"></div>
+                  </div>
+                  <div class="progress-text">${this.formatNumber(achievement.progress)} / ${this.formatNumber(achievement.target)}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : ''}
     `;
   }
 

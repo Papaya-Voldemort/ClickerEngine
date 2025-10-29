@@ -35,6 +35,22 @@ export function createExampleGame(): ClickerGameEngine {
     color: '#00FF00'
   });
 
+  game.addCurrency({
+    id: 'prestige-points',
+    name: 'Prestige Points',
+    amount: 0,
+    symbol: '⭐',
+    color: '#FF00FF'
+  });
+
+  game.addCurrency({
+    id: 'crystals',
+    name: 'Crystals',
+    amount: 0,
+    symbol: '💠',
+    color: '#00FFFF'
+  });
+
   // ============================================================
   // SETUP UPGRADES - CLICK POWER
   // ============================================================
@@ -65,6 +81,34 @@ export function createExampleGame(): ClickerGameEngine {
     scalable: true,
     scaleFactor: 1.2,
     icon: '💥'
+  });
+
+  game.addUpgrade({
+    id: 'click-power-3',
+    name: 'Ultra Click',
+    description: 'Double your click value',
+    cost: 10000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 2.0,
+    scalable: true,
+    scaleFactor: 1.25,
+    icon: '🚀'
+  });
+
+  game.addUpgrade({
+    id: 'critical-click',
+    name: 'Critical Strikes',
+    description: 'Increase click value by 25%',
+    cost: 5000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 1.25,
+    scalable: true,
+    scaleFactor: 1.18,
+    icon: '⚔️'
   });
 
   // ============================================================
@@ -99,6 +143,112 @@ export function createExampleGame(): ClickerGameEngine {
     icon: '🤖'
   });
 
+  game.addUpgrade({
+    id: 'worker-3',
+    name: 'Expert Engineer',
+    description: 'Gain 50 gold per second',
+    cost: 5000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 50,
+    scalable: true,
+    scaleFactor: 1.15,
+    icon: '👨‍🔧'
+  });
+
+  game.addUpgrade({
+    id: 'worker-4',
+    name: 'Automation System',
+    description: 'Gain 200 gold per second',
+    cost: 25000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 200,
+    scalable: true,
+    scaleFactor: 1.15,
+    icon: '🏭'
+  });
+
+  game.addUpgrade({
+    id: 'worker-5',
+    name: 'AI Processor',
+    description: 'Gain 1000 gold per second',
+    cost: 100000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 1000,
+    scalable: true,
+    scaleFactor: 1.15,
+    icon: '🧠'
+  });
+
+  // ============================================================
+  // SETUP UPGRADES - MULTIPLIERS
+  // ============================================================
+
+  game.addUpgrade({
+    id: 'gold-multiplier-1',
+    name: 'Golden Touch',
+    description: 'Boost all gold production by 20%',
+    cost: 2000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 1.2,
+    scalable: true,
+    scaleFactor: 1.3,
+    icon: '✨'
+  });
+
+  game.addUpgrade({
+    id: 'gold-multiplier-2',
+    name: 'Midas Hand',
+    description: 'Boost all gold production by 50%',
+    cost: 20000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 1.5,
+    scalable: true,
+    scaleFactor: 1.4,
+    icon: '🌟'
+  });
+
+  // ============================================================
+  // SETUP UPGRADES - SPECIAL
+  // ============================================================
+
+  game.addUpgrade({
+    id: 'gem-generator',
+    name: 'Gem Generator',
+    description: 'Generate 1 gem per second',
+    cost: 50000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 1,
+    scalable: true,
+    scaleFactor: 1.5,
+    icon: '💎'
+  });
+
+  game.addUpgrade({
+    id: 'crystal-forge',
+    name: 'Crystal Forge',
+    description: 'Generate 0.5 crystals per second',
+    cost: 100000,
+    currencyId: 'gold',
+    level: 0,
+    purchased: false,
+    effect: 0.5,
+    scalable: true,
+    scaleFactor: 1.6,
+    icon: '💠'
+  });
+
   // ============================================================
   // SETUP PARADIGMS
   // ============================================================
@@ -115,19 +265,46 @@ export function createExampleGame(): ClickerGameEngine {
   game.addParadigm({
     id: 'mid-game',
     name: 'Mid Game',
-    description: 'You are getting stronger',
+    description: 'You are getting stronger - 2x production',
     active: false,
     productionMultiplier: 2,
     data: { milestone: 'first-prestige' }
   });
 
   game.addParadigm({
-    id: 'prestige',
-    name: 'Prestige Mode',
-    description: 'Reset for massive bonuses',
+    id: 'late-game',
+    name: 'Late Game',
+    description: 'Advanced gameplay - 5x production',
     active: false,
     productionMultiplier: 5,
+    data: { unlocked: false }
+  });
+
+  game.addParadigm({
+    id: 'prestige',
+    name: 'Prestige Mode',
+    description: 'Reset for massive bonuses - 10x production',
+    active: false,
+    productionMultiplier: 10,
     data: { prestigeLevel: 0 }
+  });
+
+  game.addParadigm({
+    id: 'transcendence',
+    name: 'Transcendence',
+    description: 'Beyond normal limits - 25x production',
+    active: false,
+    productionMultiplier: 25,
+    data: { transcendenceLevel: 0 }
+  });
+
+  game.addParadigm({
+    id: 'infinity',
+    name: 'Infinity',
+    description: 'Endless power - 100x production',
+    active: false,
+    productionMultiplier: 100,
+    data: { infinityLevel: 0 }
   });
 
   // ============================================================
@@ -162,12 +339,21 @@ export function createExampleGame(): ClickerGameEngine {
   });
 
   game.addTab({
+    id: 'achievements',
+    name: 'Achievements',
+    icon: '🏆',
+    visible: true,
+    active: false,
+    order: 3
+  });
+
+  game.addTab({
     id: 'prestige',
     name: 'Prestige',
     icon: '👑',
     visible: true,
     active: false,
-    order: 3
+    order: 4
   });
 
   game.addTab({
@@ -176,7 +362,188 @@ export function createExampleGame(): ClickerGameEngine {
     icon: '⚙️',
     visible: true,
     active: false,
-    order: 4
+    order: 5
+  });
+
+  // ============================================================
+  // SETUP ACHIEVEMENTS
+  // ============================================================
+
+  game.addAchievement({
+    id: 'first-click',
+    name: 'First Steps',
+    description: 'Click for the first time',
+    icon: '👆',
+    unlocked: false,
+    progress: 0,
+    target: 1,
+    category: 'clicks'
+  });
+
+  game.addAchievement({
+    id: 'click-100',
+    name: 'Clicking Novice',
+    description: 'Click 100 times',
+    icon: '🖱️',
+    unlocked: false,
+    progress: 0,
+    target: 100,
+    category: 'clicks'
+  });
+
+  game.addAchievement({
+    id: 'click-1000',
+    name: 'Clicking Expert',
+    description: 'Click 1000 times',
+    icon: '⚡',
+    unlocked: false,
+    progress: 0,
+    target: 1000,
+    category: 'clicks'
+  });
+
+  game.addAchievement({
+    id: 'click-10000',
+    name: 'Clicking Master',
+    description: 'Click 10000 times',
+    icon: '💥',
+    unlocked: false,
+    progress: 0,
+    target: 10000,
+    category: 'clicks'
+  });
+
+  game.addAchievement({
+    id: 'gold-1k',
+    name: 'Wealthy Beginner',
+    description: 'Accumulate 1,000 gold',
+    icon: '💰',
+    unlocked: false,
+    progress: 0,
+    target: 1000,
+    category: 'currency'
+  });
+
+  game.addAchievement({
+    id: 'gold-100k',
+    name: 'Rich',
+    description: 'Accumulate 100,000 gold',
+    icon: '💎',
+    unlocked: false,
+    progress: 0,
+    target: 100000,
+    category: 'currency'
+  });
+
+  game.addAchievement({
+    id: 'gold-1m',
+    name: 'Millionaire',
+    description: 'Accumulate 1,000,000 gold',
+    icon: '👑',
+    unlocked: false,
+    progress: 0,
+    target: 1000000,
+    category: 'currency'
+  });
+
+  game.addAchievement({
+    id: 'first-upgrade',
+    name: 'Upgrader',
+    description: 'Purchase your first upgrade',
+    icon: '⬆️',
+    unlocked: false,
+    progress: 0,
+    target: 1,
+    category: 'upgrades'
+  });
+
+  game.addAchievement({
+    id: 'upgrade-10',
+    name: 'Upgrade Enthusiast',
+    description: 'Purchase 10 upgrades',
+    icon: '📈',
+    unlocked: false,
+    progress: 0,
+    target: 10,
+    category: 'upgrades'
+  });
+
+  game.addAchievement({
+    id: 'upgrade-50',
+    name: 'Upgrade Collector',
+    description: 'Purchase 50 upgrades',
+    icon: '🎯',
+    unlocked: false,
+    progress: 0,
+    target: 50,
+    category: 'upgrades'
+  });
+
+  game.addAchievement({
+    id: 'first-worker',
+    name: 'Employer',
+    description: 'Hire your first worker',
+    icon: '👷',
+    unlocked: false,
+    progress: 0,
+    target: 1,
+    category: 'workers'
+  });
+
+  game.addAchievement({
+    id: 'worker-army',
+    name: 'Army of Workers',
+    description: 'Have 50 total worker levels',
+    icon: '👥',
+    unlocked: false,
+    progress: 0,
+    target: 50,
+    category: 'workers'
+  });
+
+  game.addAchievement({
+    id: 'production-100',
+    name: 'Production Line',
+    description: 'Reach 100 gold per second production',
+    icon: '🏭',
+    unlocked: false,
+    progress: 0,
+    target: 100,
+    category: 'production'
+  });
+
+  game.addAchievement({
+    id: 'production-1000',
+    name: 'Industrial Complex',
+    description: 'Reach 1000 gold per second production',
+    icon: '🏗️',
+    unlocked: false,
+    progress: 0,
+    target: 1000,
+    category: 'production'
+  });
+
+  game.addAchievement({
+    id: 'first-paradigm',
+    name: 'Paradigm Shifter',
+    description: 'Switch paradigms for the first time',
+    icon: '🔄',
+    unlocked: false,
+    progress: 0,
+    target: 1,
+    category: 'paradigm'
+  });
+
+  game.addAchievement({
+    id: 'speedrun',
+    name: 'Speed Demon',
+    description: 'Reach 10,000 gold in under 5 minutes',
+    icon: '⚡',
+    unlocked: false,
+    progress: 0,
+    target: 1,
+    category: 'special',
+    hidden: true
   });
 
   // ============================================================
@@ -203,8 +570,16 @@ export function createExampleGame(): ClickerGameEngine {
     if (!upgrade) return;
 
     // Update click multiplier based on click power upgrades
-    if (data.upgradeId.startsWith('click-power')) {
-      const multiplier = game.getUpgradeManager().getTotalEffect('click-power');
+    if (data.upgradeId.startsWith('click-power') || data.upgradeId === 'critical-click') {
+      let multiplier = 1;
+      const clickUpgrades = game.getUpgradeManager().getFiltered(u => 
+        u.id.startsWith('click-power') || u.id === 'critical-click'
+      );
+      clickUpgrades.forEach(u => {
+        if (u.level > 0) {
+          multiplier *= Math.pow(u.effect, u.level);
+        }
+      });
       game.setClickMultiplier('gold', multiplier);
       console.log(`Click multiplier updated to ${multiplier.toFixed(2)}x`);
     }
@@ -218,6 +593,65 @@ export function createExampleGame(): ClickerGameEngine {
       });
       game.setProductionRate('gold', totalProduction);
       console.log(`Production rate updated to ${totalProduction} per second`);
+      
+      // Update production achievement
+      game.updateAchievementProgress('production-100', totalProduction);
+      game.updateAchievementProgress('production-1000', totalProduction);
+      
+      // Update worker achievements
+      const totalWorkerLevels = workers.reduce((sum, w) => sum + w.level, 0);
+      game.updateAchievementProgress('worker-army', totalWorkerLevels);
+    }
+
+    // Handle gem generator
+    if (data.upgradeId === 'gem-generator') {
+      let gemProduction = 0;
+      const gemGen = game.getUpgrade('gem-generator');
+      if (gemGen) {
+        gemProduction = gemGen.effect * gemGen.level;
+      }
+      game.setProductionRate('gems', gemProduction);
+    }
+
+    // Handle crystal forge
+    if (data.upgradeId === 'crystal-forge') {
+      let crystalProduction = 0;
+      const crystalForge = game.getUpgrade('crystal-forge');
+      if (crystalForge) {
+        crystalProduction = crystalForge.effect * crystalForge.level;
+      }
+      game.setProductionRate('crystals', crystalProduction);
+    }
+
+    // Update upgrade achievements
+    const totalUpgradeLevels = game.getUpgradeManager().getAll()
+      .reduce((sum, u) => sum + u.level, 0);
+    game.updateAchievementProgress('first-upgrade', totalUpgradeLevels);
+    game.updateAchievementProgress('upgrade-10', totalUpgradeLevels);
+    game.updateAchievementProgress('upgrade-50', totalUpgradeLevels);
+    
+    // Check for first worker
+    if (data.upgradeId.startsWith('worker-')) {
+      game.updateAchievementProgress('first-worker', 1);
+    }
+  });
+
+  // Track clicks for achievements
+  game.on('click', () => {
+    const clicks = game.getTotalClicks();
+    game.updateAchievementProgress('first-click', clicks);
+    game.updateAchievementProgress('click-100', clicks);
+    game.updateAchievementProgress('click-1000', clicks);
+    game.updateAchievementProgress('click-10000', clicks);
+  });
+
+  // Track currency for achievements
+  game.on(GameEvents.CURRENCY_CHANGED, (data: any) => {
+    if (data.currencyId === 'gold') {
+      const gold = game.getCurrencyAmount('gold');
+      game.updateAchievementProgress('gold-1k', gold);
+      game.updateAchievementProgress('gold-100k', gold);
+      game.updateAchievementProgress('gold-1m', gold);
     }
   });
 
@@ -226,6 +660,12 @@ export function createExampleGame(): ClickerGameEngine {
     console.log(
       `Paradigm changed to '${data.paradigmName}' with ${data.multiplier}x multiplier`
     );
+    game.updateAchievementProgress('first-paradigm', 1);
+  });
+
+  // Log achievement unlocks
+  game.on('achievement:unlocked', (data: any) => {
+    console.log(`🏆 Achievement unlocked: ${data.achievement.name}`);
   });
 
   // Log tab switches
