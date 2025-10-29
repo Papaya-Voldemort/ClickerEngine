@@ -175,6 +175,17 @@
   line-height: var(--line-height-relaxed);
 }
 
+.upgrade-card__effect {
+  font-size: var(--font-size-xs);
+  color: var(--accent-success);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: var(--radius-md);
+  display: inline-block;
+}
+
 .upgrade-card__footer {
   display: flex;
   align-items: center;

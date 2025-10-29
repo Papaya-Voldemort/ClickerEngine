@@ -147,17 +147,40 @@ export class GameUI {
   private getMainTabContent(): string {
     const gold = this.game.getCurrencyAmount('gold');
     const clickMultiplier = this.game.getClickMultiplier('gold');
+    const production = this.game.getDisplayProduction('gold');
+    const paradigm = this.game.getCurrentParadigm();
     
     return `
       <div class="click-area">
         <h2 class="section-heading text-center">Click to Earn Gold!</h2>
         
-        <div class="click-area__stats">
+        <div class="grid grid--2-cols" style="margin-bottom: var(--spacing-lg); gap: var(--spacing-md);">
           <div class="stat">
             <span class="stat__label">Per Click</span>
             <span class="stat__value">
               <span class="stat__icon">💰</span>
               <span>${this.formatNumber(clickMultiplier)}</span>
+            </span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Per Second</span>
+            <span class="stat__value">
+              <span class="stat__icon">⏱️</span>
+              <span>${this.formatNumber(production)}</span>
+            </span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Current Gold</span>
+            <span class="stat__value">
+              <span class="stat__icon">💰</span>
+              <span>${this.formatNumber(gold)}</span>
+            </span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Paradigm</span>
+            <span class="stat__value">
+              <span class="stat__icon">${paradigm?.name === 'Early Game' ? '🌱' : paradigm?.name === 'Mid Game' ? '🌿' : '⭐'}</span>
+              <span>${paradigm?.productionMultiplier || 1}x</span>
             </span>
           </div>
         </div>
@@ -178,7 +201,15 @@ export class GameUI {
    */
   private getUpgradesTabContent(): string {
     const upgrades = this.game.getUpgradeManager()
-      .getFiltered((u: Upgrade) => u.id.startsWith('click-power'));
+      .getFiltered((u: Upgrade) => u.id.startsWith('click-power') || u.id === 'critical-click');
+    
+    // Calculate total click multiplier
+    let clickMultiplier = 1;
+    upgrades.forEach(u => {
+      if (u.level > 0) {
+        clickMultiplier *= Math.pow(u.effect, u.level);
+      }
+    });
     
     if (upgrades.length === 0) {
       return `
@@ -191,6 +222,19 @@ export class GameUI {
 
     return `
       <h2 class="section-heading">Click Power Upgrades</h2>
+      
+      <div class="card" style="margin-bottom: var(--spacing-lg);">
+        <div class="card__body">
+          <div class="stat">
+            <span class="stat__label">Total Click Power</span>
+            <span class="stat__value">
+              <span class="stat__icon">⚡</span>
+              <span>${this.formatNumber(clickMultiplier)}x</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      
       <div class="grid grid--auto-fit">
         ${upgrades.map((upgrade: Upgrade) => this.getUpgradeCardHTML(upgrade)).join('')}
       </div>
@@ -204,6 +248,12 @@ export class GameUI {
     const workers = this.game.getUpgradeManager()
       .getFiltered((u: Upgrade) => u.id.startsWith('worker-'));
     
+    // Calculate total production from workers
+    let totalProduction = 0;
+    workers.forEach(worker => {
+      totalProduction += worker.effect * worker.level;
+    });
+    
     if (workers.length === 0) {
       return `
         <div class="empty-state">
@@ -215,6 +265,26 @@ export class GameUI {
 
     return `
       <h2 class="section-heading">Workers (Passive Income)</h2>
+      
+      <div class="card" style="margin-bottom: var(--spacing-lg);">
+        <div class="card__body">
+          <div class="stat">
+            <span class="stat__label">Total Production</span>
+            <span class="stat__value">
+              <span class="stat__icon">🏭</span>
+              <span>${this.formatNumber(totalProduction)}/s</span>
+            </span>
+          </div>
+          <div class="stat" style="margin-top: var(--spacing-sm);">
+            <span class="stat__label">With Multiplier</span>
+            <span class="stat__value">
+              <span class="stat__icon">✨</span>
+              <span>${this.formatNumber(this.game.getDisplayProduction('gold'))}/s</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      
       <div class="grid grid--auto-fit">
         ${workers.map((worker: Upgrade) => this.getUpgradeCardHTML(worker)).join('')}
       </div>
@@ -398,6 +468,21 @@ export class GameUI {
     const canAfford = this.game.getCurrencyAmount(upgrade.currencyId) >= cost;
     const affordClass = canAfford ? 'upgrade-card--affordable' : 'upgrade-card--unaffordable';
     
+    // Calculate effect info
+    let effectText = '';
+    if (upgrade.id.startsWith('worker-')) {
+      effectText = `+${this.formatNumber(upgrade.effect)}/s per level`;
+    } else if (upgrade.id.startsWith('click-power') || upgrade.id === 'critical-click') {
+      const percentIncrease = ((upgrade.effect - 1) * 100).toFixed(0);
+      effectText = `+${percentIncrease}% per level`;
+    } else if (upgrade.id === 'gem-generator') {
+      effectText = `+${upgrade.effect} gems/s per level`;
+    } else if (upgrade.id === 'crystal-forge') {
+      effectText = `+${upgrade.effect} crystals/s per level`;
+    } else {
+      effectText = `${upgrade.effect}x`;
+    }
+    
     return `
       <div class="upgrade-card ${affordClass}" data-upgrade-id="${upgrade.id}">
         <div class="upgrade-card__header">
@@ -405,6 +490,7 @@ export class GameUI {
           <div class="upgrade-card__info">
             <div class="upgrade-card__name">${upgrade.name}</div>
             <div class="upgrade-card__description">${upgrade.description}</div>
+            ${upgrade.level > 0 ? `<div class="upgrade-card__effect">${effectText}</div>` : ''}
           </div>
         </div>
         <div class="upgrade-card__footer">
